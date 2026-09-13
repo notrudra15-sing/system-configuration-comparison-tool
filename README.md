@@ -84,8 +84,17 @@ The application displays the results directly on the web page.
 
 ### 1. Clone the repository
 
+Run the following command in PowerShell or a terminal:
+
 ```bash
 git clone https://github.com/notrudra15-sing/system-configuration-comparison-tool.git
+```
+
+Wait for the repository to finish cloning.
+
+Then enter the project directory using:
+
+```bash
 cd system-configuration-comparison-tool
 ```
 
