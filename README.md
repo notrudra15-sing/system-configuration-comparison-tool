@@ -1,226 +1,130 @@
 # System Configuration Comparison Tool
 
-A Python + Flask web application that detects the configuration of the
-computer running the application (System A), accepts a JSON
-configuration from another computer (System B), and compares the two
-systems.
+A Python and Flask-based web application for detecting, comparing, and displaying system configurations from two computers.
+
+## Project Overview
+
+The System Configuration Comparison Tool automatically detects the specifications of the computer running the application (System A) and compares them with the specifications of another computer provided through a JSON configuration file (System B).
+
+The project was developed as a hands-on project for the CSE111 EDU-Revolution initiative.
 
 ## Features
 
--   Automatic System A detection
--   CPU, RAM, storage, OS, architecture, GPU, and CPU-frequency
-    detection
--   System B JSON generation
--   JSON upload through a Flask dashboard
--   Match, mismatch, numeric-difference, and missing-field results
--   Detailed malformed-JSON error messages
--   Responsive dark-themed dashboard
+* Detects operating system and OS version
+* Detects system architecture
+* Detects CPU model
+* Detects CPU frequency
+* Detects physical and logical CPU cores
+* Detects total RAM
+* Detects total storage
+* Detects GPU where possible
+* Generates a portable JSON configuration for another computer
+* Loads System B configuration through a web upload
+* Compares System A and System B specifications
+* Identifies matching and mismatching specifications
+* Calculates numerical differences where applicable
+* Handles invalid JSON files without crashing
+* Provides a responsive web interface
+* Uses separate CSS classes for comparison results
 
 ## Project Structure
 
-``` text
+```text
 Spec Comparison/
+├── README.md
 ├── app.py
 ├── main.py
 ├── generate_config.py
-├── system_b.json
-├── README.md
+├── example_system_B.json
+├── .gitignore
 ├── templates/
 │   └── index.html
 └── static/
     └── style.css
 ```
 
+## File Description
+
+* `app.py` — Flask application and web interface logic
+* `main.py` — System information detection and comparison logic
+* `generate_config.py` — Generates a JSON configuration containing the specifications of another computer
+* `example_system_B.json` — Example System B configuration
+* `templates/index.html` — HTML structure of the web interface
+* `static/style.css` — Styling for the web interface
+* `.gitignore` — Prevents generated Python files such as `__pycache__` from being tracked
+* `README.md` — Project documentation
+
 ## How It Works
 
-**System A:** The computer running Flask is detected automatically using
-Python libraries and OS-specific methods.
+The application uses two systems for comparison.
 
-**System B:** Another computer's configuration is stored in JSON and
-uploaded through the dashboard.
+### System A
 
-**Comparison:** Shared fields are compared. Equal values produce
-`Match`, different numeric values produce a rounded numerical
-difference, different non-numeric values produce a `Mismatch`, and
-missing System B fields produce `Not found in System B`.
+System A is the computer that runs `app.py`.
 
-## Problems Faced and Solutions
+The application automatically detects its specifications using Python libraries and operating-system information.
 
-### 1. Installing `psutil` on Arch/Omarchy
+### System B
 
-**Problem:** `pip install psutil` produced the PEP 668
-`externally-managed-environment` error.
+System B is represented by a JSON file generated from another computer.
 
-**Solution:** The Arch package manager was used:
+`generate_config.py` detects the specifications of that computer and saves them in a JSON format. The JSON file can then be transferred to the computer running the application and uploaded through the web interface.
 
-``` bash
-sudo pacman -S python-psutil
+### Comparison
+
+After the System B JSON file is uploaded, the application compares the available specifications between System A and System B.
+
+* **Match** — Both systems have the same value.
+* **Mismatch** — The values are different for non-numerical specifications.
+* **Difference** — A numerical difference is calculated for numerical specifications.
+
+The application displays the results directly on the web page.
+
+## How to Run This App
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/notrudra15-sing/system-configuration-comparison-tool.git
+cd system-configuration-comparison-tool
 ```
 
-### 2. Flask port 5000 was already in use
+### 2. Install dependencies
 
-**Problem:** Flask's default port was occupied.
+The application requires Flask and psutil.
 
-**Solution:** The application was moved to port 5001:
+#### Linux / Arch Linux
 
-``` python
-app.run(port=5001)
+```bash
+sudo pacman -S python-flask python-psutil
 ```
 
-### 3. `system_b.json` FileNotFoundError
+#### Windows
 
-**Problem:** The application initially tried to read `system_b.json`
-from the local project directory, causing a `FileNotFoundError` when it
-was not at the expected path.
-
-**Solution:** System B was changed to a browser-uploaded JSON file
-rather than a file automatically read from the same machine.
-
-### 4. System B needed to represent another computer
-
-**Problem:** Reading a local JSON file did not properly demonstrate
-comparison between two computers.
-
-**Solution:** `generate_config.py` was created so another computer can
-generate its configuration as a portable JSON file.
-
-### 5. CPU frequency is dynamic
-
-**Problem:** CPU frequency can change between measurements.
-
-**Solution:** CPU frequency is treated as a numeric snapshot and its
-difference is rounded to two decimal places.
-
-### 6. Floating-point output was unnecessarily long
-
-**Problem:** Calculated values sometimes contained excessive decimal
-digits.
-
-**Solution:** Relevant values and comparison differences use
-`round(value, 2)`.
-
-### 7. Malformed JSON could crash the app
-
-**Problem:** Invalid JSON caused `json.load()` to raise
-`JSONDecodeError`.
-
-**Solution:** JSON loading was placed inside `try/except`, allowing the
-application to continue running and report the error.
-
-### 8. The JSON error message was too generic
-
-**Problem:** The initial message only said `Invalid JSON file.`
-
-**Solution:** The final message includes the parser's description, line
-number, and column number, for example:
-
-``` text
-Invalid JSON file: ... (line 5, column 12)
+```bash
+python -m pip install flask psutil
 ```
 
-### 9. No file selected
+### 3. Start the application
 
-**Problem:** The upload form needed to prevent submission without a
-file.
-
-**Solution:** The HTML file input uses `required`, so the browser
-handles this before the request reaches Flask.
-
-### 10. Empty JSON file
-
-**Problem:** An empty System B configuration contains no fields.
-
-**Observed behavior:** The app stayed alive and reported
-`Not found in System B` for System A fields.
-
-**Decision:** This was accepted as reasonable prototype behavior because
-the application did not crash and clearly showed that System B contained
-no matching fields.
-
-### 11. Wrong data type in a JSON value
-
-**Problem:** A JSON value could have an unexpected type, such as:
-
-``` json
-"Physical Cores": "potato"
-```
-
-**Solution:** The comparison logic checks that both values are numeric
-before subtraction. The example is therefore reported as a mismatch
-rather than causing a calculation error.
-
-### 12. Comparison colors were initially inline
-
-**Problem:** Match, difference, and mismatch colors were temporarily
-written directly in the HTML.
-
-**Solution:** They were moved into `.match`, `.difference`, and
-`.mismatch` CSS classes, keeping HTML structure separate from
-presentation.
-
-### 13. CSS changes appeared not to work
-
-**Problem:** Updated CSS did not immediately appear in the browser.
-
-**Solution:** Browser caching was identified as the cause; refreshing
-the page loaded the updated stylesheet.
-
-### 14. Dashboard needed smaller-screen support
-
-**Problem:** Side-by-side system cards could become cramped on small
-screens.
-
-**Solution:** A media query stacks the cards vertically below 700px.
-
-## Technologies Used
-
--   Python
--   Flask
--   psutil
--   platform
--   subprocess
--   HTML
--   CSS
--   JSON
--   Jinja
-
-## Running the Project
-
-On Arch/Omarchy, install the required packages:
-
-``` bash
-sudo pacman -S python-psutil python-flask
-```
-
-Run:
-
-``` bash
+```bash
 python app.py
 ```
 
-Open:
+The Flask application runs on port `5001`.
 
-``` text
+Open the following address in a web browser:
+
+```text
 http://127.0.0.1:5001
 ```
 
-To compare another computer, run `generate_config.py` on that computer,
-transfer the generated JSON file, and upload it through the dashboard.
+The computer running `app.py` becomes System A automatically.
 
-## Future Improvements
+### 4. Generate a System B configuration
 
--   Improve GPU detection across operating systems
--   Replace deprecated Windows WMIC commands with modern methods
--   Support multiple storage drives
--   Add richer comparison summaries
--   Export comparison results
--   Add stronger JSON schema validation
--   Add automated tests
+On another computer, run:
 
-## Project Status
-
-**Working Prototype**
-
-The main detection, JSON generation, upload, comparison, error handling,
-responsive dashboard, and edge-case testing workflows are implemented
-and working.
+```bash
+python generate_config.py
+```
