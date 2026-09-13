@@ -1,0 +1,12 @@
+{
+    "Operating System": "Linux",
+    "OS Version": "Ubuntu 20.04",
+    "Architecture": "x86_64",
+    "CPU Model": "Intel Core i7-10700K",
+    "CPU Frequency": 3200,
+    "Physical Cores": 6,
+    "Logical Cores": 6,
+    "Total RAM": 16,
+    "Total Storage": 512,
+    "GPU": "NVIDIA RTX 3060"
+}

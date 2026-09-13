@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>System Configuration Comparison Tool</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <h1>System Configuration Comparison Tool</h1>
+
+
+        <!-- SYSTEM INFORMATION -->
+
+        <div class="systems">
+
+            <!-- SYSTEM A -->
+
+            <div class="system-card">
+
+                <h2>System A</h2>
+
+                <p class="subtitle">
+                    Current computer
+                </p>
+
+                {% for key, value in system_info.items() %}
+
+                    <p>
+                        <strong>{{ key }}:</strong> {{ value }}
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- SYSTEM B -->
+
+            {% if system_b %}
+
+            <div class="system-card">
+
+                <h2>System B</h2>
+
+                <p class="subtitle">
+                    Uploaded configuration
+                </p>
+
+                {% for key, value in system_b.items() %}
+
+                    <p>
+                        <strong>{{ key }}:</strong> {{ value }}
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- UPLOAD SECTION -->
+
+        <section class="upload-section">
+
+            {% if system_b %}
+
+                <h2>System B loaded ✓</h2>
+
+                <p class="subtitle">
+                    System B has been successfully uploaded and compared.
+                </p>
+
+                <div class="uploaded-file">
+                    System B configuration loaded
+                </div>
+
+
+                <form method="POST" enctype="multipart/form-data">
+
+                    <label for="system_b">
+                        Compare another system:
+                    </label>
+
+                    <input
+                        type="file"
+                        id="system_b"
+                        name="system_b"
+                        accept=".json"
+                        required
+                    >
+
+                    <button type="submit">
+                        Compare
+                    </button>
+
+                </form>
+
+
+            {% else %}
+
+                <h2>Upload System B</h2>
+
+                <p class="subtitle">
+                    Upload a JSON configuration from another computer.
+                </p>
+
+
+                <form method="POST" enctype="multipart/form-data">
+
+                    <input
+                        type="file"
+                        name="system_b"
+                        accept=".json"
+                        required
+                    >
+
+                    <button type="submit">
+                        Compare Systems
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- COMPARISON RESULTS -->
+
+        {% if comparison %}
+
+        <section class="comparison-section">
+
+            <h2>Comparison Results</h2>
+
+
+            {% for key, result in comparison.items() %}
+
+            <div class="comparison-row">
+
+                <strong>{{ key }}</strong>
+
+
+                {% if result == "Match" %}
+
+                    <span class="match">
+                        {{ result }}
+                    </span>
+
+
+                {% elif result.startswith("Difference") %}
+
+                    <span class="difference">
+                        {{ result }}
+                    </span>
+
+
+                {% else %}
+
+                    <span class ="mismatch">
+                        {{ result }}
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+
+        </section>
+
+        {% endif %}
+
+
+    </div>
+
+</body>
+
+</html>
